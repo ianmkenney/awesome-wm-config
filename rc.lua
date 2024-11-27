@@ -18,6 +18,9 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
+-- External tool (terminal, editor, etc) interface module
+tooling = require("tooling")
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -48,8 +51,8 @@ end
 beautiful.init("/home/ikenney/.config/awesome/themes/default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "wezterm"
-editor = "emacs"
+terminal = tooling.terminal
+editor = tooling.editor
 editor_cmd = editor
 
 -- Default modkey.
@@ -59,7 +62,6 @@ editor_cmd = editor
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
 
--- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
     awful.layout.suit.floating,
     awful.layout.suit.tile,
@@ -73,12 +75,7 @@ awful.layout.layouts = {
     awful.layout.suit.max,
     awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier,
-    -- awful.layout.suit.corner.nw,
-    -- awful.layout.suit.corner.ne,
-    -- awful.layout.suit.corner.sw,
-    -- awful.layout.suit.corner.se,
 }
--- }}}
 
 -- {{{ Menu
 -- Create a launcher widget and a main menu
@@ -168,6 +165,9 @@ local function set_wallpaper(s)
     end
 end
 
+local battery_meter = require("widgets.battery")
+local temp_box = require("widgets.temperature")
+
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
 
@@ -194,18 +194,18 @@ awful.screen.connect_for_each_screen(function(s)
     s.mytaglist = awful.widget.taglist {
         screen  = s,
         filter  = awful.widget.taglist.filter.all,
-        buttons = taglist_buttons
+        buttons = taglist_buttons,
     }
 
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+        buttons = tasklist_buttons,
     }
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s })
+    s.mywibox = awful.wibar({ position = "top", screen = s})
 
     -- Add widgets to the wibox
     s.mywibox:setup {
@@ -221,6 +221,8 @@ awful.screen.connect_for_each_screen(function(s)
             layout = wibox.layout.fixed.horizontal,
             mykeyboardlayout,
             wibox.widget.systray(),
+	    battery_meter,
+	    temp_box,
             mytextclock,
             s.mylayoutbox,
         },
@@ -228,29 +230,28 @@ awful.screen.connect_for_each_screen(function(s)
 end)
 -- }}}
 
--- {{{ Mouse bindings
-root.buttons(gears.table.join(
-    awful.button({ }, 3, function () mymainmenu:toggle() end)
-))
--- }}}
-
 -- {{{ Key bindings
 globalkeys = gears.table.join(
-    awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
-              {description="show help", group="awesome"}),
-    awful.key({ modkey,           }, "Left",   awful.tag.viewprev,
-              {description = "view previous", group = "tag"}),
-    awful.key({ modkey,           }, "Right",  awful.tag.viewnext,
-              {description = "view next", group = "tag"}),
-    awful.key({ modkey,           }, "Escape", awful.tag.history.restore,
-              {description = "go back", group = "tag"}),
+   awful.key({}, "XF86MonBrightnessDown", tooling.brightness.down, {description = "-10%", group="hotkeys"}),
+   awful.key({}, "XF86MonBrightnessUp",   tooling.brightness.up,   {description = "+10%", group="hotkeys"}),
+   awful.key({}, "XF86AudioRaiseVolume",  tooling.volume.up,       {description = "volume up", group="hotkeys"}),
+   awful.key({}, "XF86AudioLowerVolume",  tooling.volume.down,     {description = "volume down", group="hotkeys"}),
+   awful.key({}, "XF86AudioMute",         tooling.volume.mute,     {description = "mute volume", group="hotkeys"}),
+   awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
+      {description="show help", group="awesome"}),
+   awful.key({ modkey,           }, "Left",   awful.tag.viewprev,
+      {description = "view previous", group = "tag"}),
+   awful.key({ modkey,           }, "Right",  awful.tag.viewnext,
+      {description = "view next", group = "tag"}),
+   awful.key({ modkey,           }, "Escape", awful.tag.history.restore,
+      {description = "go back", group = "tag"}),
 
-    awful.key({ modkey,           }, "j",
-        function ()
-            awful.client.focus.byidx( 1)
-        end,
-        {description = "focus next by index", group = "client"}
-    ),
+   awful.key({ modkey,           }, "j",
+      function ()
+	 awful.client.focus.byidx( 1)
+      end,
+      {description = "focus next by index", group = "client"}
+   ),
     awful.key({ modkey,           }, "k",
         function ()
             awful.client.focus.byidx(-1)
@@ -288,9 +289,9 @@ globalkeys = gears.table.join(
     awful.key({ modkey, "Shift"   }, "q", awesome.quit,
               {description = "quit awesome", group = "awesome"}),
 
-    awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)          end,
+    awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.005)          end,
               {description = "increase master width factor", group = "layout"}),
-    awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)          end,
+    awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.005)          end,
               {description = "decrease master width factor", group = "layout"}),
     awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1, nil, true) end,
               {description = "increase the number of master clients", group = "layout"}),
@@ -494,12 +495,18 @@ awful.rules.rules = {
 }
 -- }}}
 
+local client_shape = function(cr, width, height)
+   gears.shape.rounded_rect(cr, width, height, 6)
+end
+
 -- {{{ Signals
 -- Signal function to execute when a new client appears.
 client.connect_signal("manage", function (c)
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
     if not awesome.startup then awful.client.setslave(c) end
+
+    c.shape = client_shape
 
     if awesome.startup
       and not c.size_hints.user_position
