@@ -41,6 +41,10 @@ awful.widget.watch("acpi -b", 3, function(layout, stdout)
 
 	 if string.find(stdout, "Charging") then
 	    pbar.color = beautiful.bg_focus
+	 elseif string.find(stdout, "Full") then
+	    pbar.color = beautiful.bg_focus
+	 elseif string.find(stdout, "Not charging") then
+	    pbar.color = beautiful.bg_focus
 	 else
 	    pbar.color = "#ff0000"
 	 end
