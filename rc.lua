@@ -63,18 +63,14 @@ editor_cmd = editor
 modkey = "Mod4"
 
 awful.layout.layouts = {
-    awful.layout.suit.floating,
     awful.layout.suit.tile,
     awful.layout.suit.tile.left,
     awful.layout.suit.tile.bottom,
     awful.layout.suit.tile.top,
     awful.layout.suit.fair,
     awful.layout.suit.fair.horizontal,
-    awful.layout.suit.spiral,
-    awful.layout.suit.spiral.dwindle,
-    awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier,
+    awful.layout.suit.floating,
 }
 
 -- {{{ Menu
@@ -237,22 +233,24 @@ globalkeys = gears.table.join(
    awful.key({}, "XF86AudioRaiseVolume",  tooling.volume.up,       {description = "volume up", group="hotkeys"}),
    awful.key({}, "XF86AudioLowerVolume",  tooling.volume.down,     {description = "volume down", group="hotkeys"}),
    awful.key({}, "XF86AudioMute",         tooling.volume.mute,     {description = "mute volume", group="hotkeys"}),
+   awful.key({ modkey, "Control", "Shift"}, "l", tooling.lock.lock, {description="lock screen", group="hotkeys"}),
+   awful.key({ modkey, "Shift" }, "s", tooling.screenshot.clip, {description="Screenshot to clipboard", group="hotkeys"}),
    awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
       {description="show help", group="awesome"}),
-   awful.key({ modkey,           }, "Left",   awful.tag.viewprev,
+   awful.key({ modkey,           }, "p",   awful.tag.viewprev,
       {description = "view previous", group = "tag"}),
-   awful.key({ modkey,           }, "Right",  awful.tag.viewnext,
+   awful.key({ modkey,           }, "n",  awful.tag.viewnext,
       {description = "view next", group = "tag"}),
    awful.key({ modkey,           }, "Escape", awful.tag.history.restore,
       {description = "go back", group = "tag"}),
 
-   awful.key({ modkey,           }, "j",
+   awful.key({ modkey,           }, "f",
       function ()
 	 awful.client.focus.byidx( 1)
       end,
       {description = "focus next by index", group = "client"}
    ),
-    awful.key({ modkey,           }, "k",
+    awful.key({ modkey,           }, "b",
         function ()
             awful.client.focus.byidx(-1)
         end,
@@ -286,12 +284,12 @@ globalkeys = gears.table.join(
               {description = "open a terminal", group = "launcher"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
               {description = "reload awesome", group = "awesome"}),
-    awful.key({ modkey, "Shift"   }, "q", awesome.quit,
+    awful.key({ modkey, "Shift", "Control"   }, "q", awesome.quit,
               {description = "quit awesome", group = "awesome"}),
 
-    awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.005)          end,
+    awful.key({ modkey,           }, "=",     function () awful.tag.incmwfact( 0.005)          end,
               {description = "increase master width factor", group = "layout"}),
-    awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.005)          end,
+    awful.key({ modkey,           }, "-",     function () awful.tag.incmwfact(-0.005)          end,
               {description = "decrease master width factor", group = "layout"}),
     awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1, nil, true) end,
               {description = "increase the number of master clients", group = "layout"}),
@@ -306,7 +304,7 @@ globalkeys = gears.table.join(
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(-1)                end,
               {description = "select previous", group = "layout"}),
 
-    awful.key({ modkey, "Control" }, "n",
+    awful.key({ modkey, "Control" }, "h",
               function ()
                   local c = awful.client.restore()
                   -- Focus restored client
@@ -333,12 +331,12 @@ globalkeys = gears.table.join(
               end,
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar
-    awful.key({ modkey }, "p", function() menubar.show() end,
+    awful.key({ modkey, "Shift" }, "r", function() menubar.show() end,
               {description = "show the menubar", group = "launcher"})
 )
 
 clientkeys = gears.table.join(
-    awful.key({ modkey,           }, "f",
+    awful.key({ modkey, "Shift"           }, "f",
         function (c)
             c.fullscreen = not c.fullscreen
             c:raise()
@@ -354,14 +352,14 @@ clientkeys = gears.table.join(
               {description = "move to screen", group = "client"}),
     awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end,
               {description = "toggle keep on top", group = "client"}),
-    awful.key({ modkey,           }, "n",
+    awful.key({ modkey,           }, "h",
         function (c)
             -- The client currently has the input focus, so it cannot be
             -- minimized, since minimized clients can't have the focus.
             c.minimized = true
         end ,
         {description = "minimize", group = "client"}),
-    awful.key({ modkey,           }, "m",
+    awful.key({ modkey, "Shift"           }, "m",
         function (c)
             c.maximized = not c.maximized
             c:raise()

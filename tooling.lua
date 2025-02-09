@@ -6,6 +6,21 @@ local tools = {}
 tools.terminal = "wezterm"
 tools.editor = "emacs"
 
+-- Screen locking
+
+tools.lock = {}
+tools.lock.lock = function()
+   awful.spawn("i3lock -u -i /home/ikenney/.config/awesome/themes/default/lock.png", false)
+end
+
+-- Screenshotting
+---- with scrot
+
+tools.screenshot = {}
+tools.screenshot.clip = function()
+   awful.spawn.with_shell("scrot - | xclip -selection clipboard -target image/png", false)
+end
+
 -- Screen brightness control
 ---- with brightnessctl
 
