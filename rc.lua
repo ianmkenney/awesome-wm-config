@@ -346,7 +346,7 @@ globalkeys = gears.table.join(
 )
 
 clientkeys = gears.table.join(
-   awful.key({ modkey, "Shift"           }, "f",
+   awful.key({ modkey, "Shift", "Control" }, "f",
       function (c)
 	 c.fullscreen = not c.fullscreen
 	 c:raise()
@@ -369,7 +369,7 @@ clientkeys = gears.table.join(
 	 c.minimized = true
       end ,
       {description = "minimize", group = "client"}),
-   awful.key({ modkey, "Shift"           }, "m",
+   awful.key({ modkey, "Shift", "Control" }, "m",
       function (c)
 	 c.maximized = not c.maximized
 	 c:raise()
