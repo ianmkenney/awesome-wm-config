@@ -1,0 +1,7 @@
+* Awesome configuration
+
+- Depenencies:
+  - i3lock >= 2.15
+  - brightnessclt >= 0.5
+  - scrot >= 1.11.1
+  - xclip >= 0.13
